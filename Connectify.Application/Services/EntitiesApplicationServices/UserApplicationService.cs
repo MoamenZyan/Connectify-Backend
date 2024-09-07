@@ -7,6 +7,8 @@ using Connectify.Domain.Factories;
 using Connectify.Application.DTOs;
 using Connectify.Domain.Entities;
 using Connectify.Application.Interfaces.UtilitesInterfaces;
+using Connectify.Application.Interfaces.ExternalNotificationsInterfaces;
+using Connectify.Application.Interfaces.ExternalNotificationsInterfaces.EmailStrategies;
 
 namespace Connectify.Application.Services.EntitiesApplicationServices
 {
@@ -17,11 +19,17 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
         private readonly IUserFriendRepository _userFriendRepository;
         private readonly IUserBlocksRepository _userBlocksRepository;
         private readonly INotificationService _notificationService;
+        private readonly INotificationRepository<InfoNotification> _infoNotificationRepository;
+        private readonly INotificationRepository<AssociatedInfoNotification> _associateInfoNotificationRepository;
         private readonly IUserNotificationRepository<UserInfoNotification> _userInfoNotificationRepository;
         private readonly IUserNotificationRepository<UserAssociatedInfoNotification> _userAssociatedInfoNotificationRepository;
         private readonly IUserService _userService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJWTService _jwtService;
+        private readonly IExternalNotificationContext _externalNotificationContext;
+        private readonly IWelcomeEmailStrategy _welcomeEmailStrategy;
+        private readonly IReceivedFriendRequestEmailStrategy _receivedFriendRequestEmailStrategy;
+
         public UserApplicationService(IUserRepository userRepository,
                                     IUserService userService,
                                     IFriendRequestRepository friendRequestRepository,
@@ -31,7 +39,12 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
                                     INotificationService notificationService,
                                     IUserNotificationRepository<UserAssociatedInfoNotification> userAssociatedInfoNotificationRepository,
                                     IUserNotificationRepository<UserInfoNotification> userInfoNotificationRepository,
-                                    IJWTService jwtService)
+                                    IJWTService jwtService,
+                                    INotificationRepository<InfoNotification> infoNotificationRepository,
+                                    INotificationRepository<AssociatedInfoNotification> associateInfoNotificationRepository,
+                                    IExternalNotificationContext externalNotificationContext,
+                                    IWelcomeEmailStrategy welcomeEmailStrategy,
+                                    IReceivedFriendRequestEmailStrategy receivedFriendRequestEmailStrategy)
         {
             _userRepository = userRepository;
             _userService = userService;
@@ -43,6 +56,11 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             _userAssociatedInfoNotificationRepository = userAssociatedInfoNotificationRepository;
             _userInfoNotificationRepository = userInfoNotificationRepository;
             _jwtService = jwtService;
+            _infoNotificationRepository = infoNotificationRepository;
+            _associateInfoNotificationRepository = associateInfoNotificationRepository;
+            _externalNotificationContext = externalNotificationContext;
+            _welcomeEmailStrategy = welcomeEmailStrategy;
+            _receivedFriendRequestEmailStrategy = receivedFriendRequestEmailStrategy;
         }
 
         // Accept Friend Request
@@ -142,10 +160,19 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             try
             {
                 var user = await _userService.CreateUser(form, _userRepository.GetUserByEmailAsync, _userRepository.GetUserByPhoneAsync);
-                await _userRepository.AddAsync(user);
+
                 var notification = _notificationService.CreateInfoNotification($"{user.Fname}, Welcome on board!");
                 var userNotification = UserNotificationFactory.CreateUserInfoNotification(notification.Id, user.Id);
-                await _unitOfWork.SaveChangesAsync();
+
+                await _infoNotificationRepository.AddAsync(notification);
+                await _userInfoNotificationRepository.AddAsync(userNotification);
+                await _userRepository.AddAsync(user);
+
+
+                _externalNotificationContext.SetStrategy(_welcomeEmailStrategy);
+                await Task.WhenAll(_unitOfWork.SaveChangesAsync(), _externalNotificationContext.Send(user.Fname, user.Email));
+
+
                 return (true, "user created");
             }
             catch (Exception ex)
@@ -171,11 +198,26 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
 
         public async Task<bool> SendFriendRequest(Guid currentUserId, Guid receiverId)
         {
+            var receiver = await _userRepository.GetUserByIdAsync(receiverId);
+            var sender = await _userRepository.GetUserByIdAsync(currentUserId);
+
+            if (receiver == null || sender == null)
+                return false;
+
+            _externalNotificationContext.SetStrategy(_receivedFriendRequestEmailStrategy);
+            var data = new Dictionary<string, string>();
+            data.Add("SenderName", sender.Fname);
+
             var friendRequest = FriendRequestFactory.CreateFriendRequest(currentUserId, receiverId);
+
             try
             {
-                await _friendRequestRepository.AddAsync(friendRequest);
+                var addFriendRequest = _friendRequestRepository.AddAsync(friendRequest);
+                var sendEmail = _externalNotificationContext.Send(receiver.Fname, receiver.Email, data);
+
+                await Task.WhenAll(addFriendRequest, sendEmail);
                 await _unitOfWork.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception ex)

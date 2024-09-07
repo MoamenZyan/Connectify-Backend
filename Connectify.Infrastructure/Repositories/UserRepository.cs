@@ -51,6 +51,8 @@ namespace Connectify.Infrastructure.Repositories
                                         .Include(u => u.UserInfoNotifications)
                                             .ThenInclude(x => x.Notification)
                                         .Include(u => u.UserAssociatedInfoNotifications)
+                                        .AsSplitQuery()
+                                        .AsNoTracking()
                                         .ToListAsync();
         }
 
@@ -61,7 +63,7 @@ namespace Connectify.Infrastructure.Repositories
 
         public async Task<User?> GetUserByIdAsync(Guid id)
         {
-            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<User?> GetUserByPhoneAsync(string phone)

@@ -23,7 +23,7 @@ namespace Connectify.Application.DTOs
         public List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
         public List<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
         public List<AssociatedInfoNotificationDto> AssociatedInfoNotifications { get; set; } = new List<AssociatedInfoNotificationDto>();
-        public List<InfoNotification> InfoNotifications { get; set; } = new List<InfoNotification>();
+        public List<InfoNotificationDto> InfoNotifications { get; set; } = new List<InfoNotificationDto>();
         public UserDto(User user)
         {
             Id = user.Id;
@@ -40,7 +40,7 @@ namespace Connectify.Application.DTOs
             SentFriendRequests = user.SentFriendRequests;
             ReceivedFriendRequests = user.ReceivedFriendRequests;
             AssociatedInfoNotifications = user.AssociatedInfoNotifications.Select(x => new AssociatedInfoNotificationDto(x.AssoicatedUser, x)).ToList();
-            InfoNotifications = user.UserInfoNotifications.Select(x => x.Notification).ToList();
+            InfoNotifications = user.UserInfoNotifications.Select(x => new InfoNotificationDto(x.Notification)).ToList();
         }
     }
     public class UserMinimalDto

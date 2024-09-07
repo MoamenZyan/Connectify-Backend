@@ -17,11 +17,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Connectify.Infrastructure.Configurations.ExternalNotificationsConfigurations;
+using Connectify.Application.Interfaces.ExternalNotificationsInterfaces;
+using Connectify.Infrastructure.Services.ExternalNotificationsServices;
+using Connectify.Application.Interfaces.ExternalNotificationsInterfaces.EmailStrategies;
+using Connectify.Infrastructure.Services.ExternalNotificationsServices.EmailStrategies;
 
 namespace Connectify.Infrastructure.IoC
 {
@@ -92,6 +95,28 @@ namespace Connectify.Infrastructure.IoC
                         ValidateLifetime = true,
                     };
                 });
+
+
+            // API Versioning
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            });
+
+
+            // External Notifications
+            services.Configure<EmailServiceConfiguration>(configuration.GetSection("SendGridConfigurations"));
+            services.AddSingleton<EmailServiceConfiguration>();
+            services.AddScoped<IExternalNotificationContext, ExternalNotificationContext>();
+
+
+            // Email Strategies
+            services.AddScoped<IWelcomeEmailStrategy, WelcomeEmailStrategy>();
+            services.AddScoped<IReceivedFriendRequestEmailStrategy, ReceivedFriendRequestEmailStrategy>();
+
 
             return services;
         }

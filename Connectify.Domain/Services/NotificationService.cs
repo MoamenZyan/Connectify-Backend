@@ -15,6 +15,7 @@ namespace Connectify.Domain.Services
         {
             InfoNotification infoNotification = new InfoNotification()
             {
+                Id = Guid.NewGuid(),
                 Content = content,
                 CreatedAt = DateTime.Now,
                 Type = Enums.NotificationType.Info

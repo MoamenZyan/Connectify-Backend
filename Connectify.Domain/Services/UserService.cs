@@ -27,19 +27,19 @@ namespace Connectify.Domain.Services
                 throw new ArgumentNullException("data is null");
 
             if (Convert.ToString(data["Fname"]) == null || Convert.ToString(data["Fname"]).Length == 0)
-                throw new ArgumentNullException("Enter first name");
+                throw new Exception("Enter first name");
 
             if (!nameRegex.IsMatch(data["Fname"]))
                 throw new Exception("First name must don't exceed 40 character and doesn't start with a number or have spaces");
 
             if (Convert.ToString(data["Lname"]) == null || Convert.ToString(data["Lname"]).Length == 0)
-                throw new ArgumentNullException("Enter last name");
+                throw new Exception("Enter last name");
 
             if (!nameRegex.IsMatch(data["Lname"]))
                 throw new Exception("Last name must don't exceed 40 character and doesn't start with a number or have spaces");
 
             if (Convert.ToString(data["Email"]) == null || Convert.ToString(data["Email"]).Length == 0)
-                throw new ArgumentNullException("Enter email");
+                throw new Exception("Enter email");
 
             if ((await checkUserEmail(data["Email"])) != null)
                 throw new Exception("Email already exists");
@@ -51,7 +51,7 @@ namespace Connectify.Domain.Services
                 throw new Exception("Password must be over 10 characters and digits");
 
             if (Convert.ToString(data["Phone"]) == null || Convert.ToString(data["Phone"]).Length == 0)
-                throw new ArgumentNullException("Enter phone");
+                throw new Exception("Enter phone");
 
             if ((await checkUserPhone(data["Phone"])) != null)
                 throw new Exception("Phone already exists");
@@ -76,7 +76,7 @@ namespace Connectify.Domain.Services
             Regex emailRegex = new Regex(emailRegexPattern);
 
             if (email == null || email.Length == 0)
-                throw new ArgumentNullException("Enter email");
+                throw new Exception("Enter email");
 
             if ((await checkUserEmail(email)) != null)
                 throw new Exception("Email already exists");
@@ -92,7 +92,7 @@ namespace Connectify.Domain.Services
             Regex nameRegex = new Regex(nameRegexPattern);
 
             if (firstName == null || firstName.Length == 0)
-                throw new ArgumentNullException("Enter first name");
+                throw new Exception("Enter first name");
 
             if (!nameRegex.IsMatch(firstName))
                 throw new Exception("First name must don't exceed 40 character and doesn't start with a number or have spaces");
@@ -105,7 +105,7 @@ namespace Connectify.Domain.Services
             Regex nameRegex = new Regex(nameRegexPattern);
 
             if (lastName == null || lastName.Length == 0)
-                throw new ArgumentNullException("Enter last name");
+                throw new Exception("Enter last name");
 
             if (!nameRegex.IsMatch(lastName))
                 throw new Exception("Last name must don't exceed 40 character and doesn't start with a number or have spaces");
@@ -126,7 +126,7 @@ namespace Connectify.Domain.Services
             Regex phoneRegex = new Regex(phoneRegexPattern);
 
             if (phoneNumber == null || phoneNumber.Length == 0)
-                throw new ArgumentNullException("Enter phone");
+                throw new Exception("Enter phone");
 
             if ((await checkUserPhone(phoneNumber)) != null)
                 throw new Exception("Phone already exists");

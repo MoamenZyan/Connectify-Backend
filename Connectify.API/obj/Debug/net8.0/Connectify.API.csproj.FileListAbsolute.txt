@@ -283,3 +283,8 @@ C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\obj\Debug\net8.0\r
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\obj\Debug\net8.0\Connectify.API.pdb
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\obj\Debug\net8.0\Connectify.API.genruntimeconfig.cache
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\obj\Debug\net8.0\ref\Connectify.API.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\Microsoft.AspNetCore.Mvc.Versioning.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\obj\Debug\net8.0\Connectify.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\SendGrid.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\StarkbankEcdsa.dll

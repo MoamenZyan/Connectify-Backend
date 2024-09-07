@@ -28,4 +28,21 @@ namespace Connectify.Application.DTOs
             RequestSenderPhoto = user.Photo;
         }
     }
+
+    public class InfoNotificationDto
+    {
+        public Guid Id { get; set; }
+        public string Content { get; set; } = null!;
+        public NotificationType Type { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public InfoNotificationDto(InfoNotification notification)
+        {
+            Id = notification.Id;
+            Content = notification.Content;
+            Type = notification.Type;
+            CreatedAt = notification.CreatedAt;
+        }
+    }
+
 }
