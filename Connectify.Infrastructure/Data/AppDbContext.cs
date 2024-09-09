@@ -26,6 +26,7 @@ namespace Connectify.Infrastructure.Data
         public DbSet<UserAssociatedInfoNotification> UserAssociatedInfoNotifications { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<UserFriend> UserFriends { get; set; }
+        public DbSet<UserPrivateChat> UserPrivateChats { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +44,7 @@ namespace Connectify.Infrastructure.Data
             modelBuilder.ApplyConfiguration(new UserInfoNotificationConfiguration());
             modelBuilder.ApplyConfiguration(new FriendRequestConfiguration());
             modelBuilder.ApplyConfiguration(new UserFriendConfiguration());
+            modelBuilder.ApplyConfiguration(new UserPrivateChatConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

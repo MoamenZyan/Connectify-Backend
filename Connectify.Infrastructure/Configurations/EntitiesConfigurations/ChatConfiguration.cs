@@ -1,4 +1,5 @@
 ﻿using Connectify.Domain.Entities;
+using Connectify.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -33,6 +34,12 @@ namespace Connectify.Infrastructure.Configurations.EntitiesConfigurations
             builder.Property(x => x.CreatedAt)
                     .HasColumnType("DATETIME2")
                     .IsRequired();
+
+            builder.Property(x => x.Type)
+                .HasConversion(
+                x => x.ToString(),
+                x => (ChatType)Enum.Parse(typeof(ChatType), x)
+            ).IsRequired();
         }
     }
 }

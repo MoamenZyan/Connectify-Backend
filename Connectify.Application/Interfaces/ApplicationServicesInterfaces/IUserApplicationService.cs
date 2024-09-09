@@ -21,5 +21,6 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
         Task<bool> UnblockUser(Guid currentUserId, Guid blockedId);
         Task<List<UserDto>?> GetAllUsers(Guid currentUserId);
         Task<string?> LoginUser(Guid userId);
+        Task<UserDto?> GetCurrentUser(Guid userId);
     }
 }

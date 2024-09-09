@@ -25,6 +25,7 @@ using Connectify.Application.Interfaces.ExternalNotificationsInterfaces;
 using Connectify.Infrastructure.Services.ExternalNotificationsServices;
 using Connectify.Application.Interfaces.ExternalNotificationsInterfaces.EmailStrategies;
 using Connectify.Infrastructure.Services.ExternalNotificationsServices.EmailStrategies;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Connectify.Infrastructure.IoC
 {
@@ -44,6 +45,7 @@ namespace Connectify.Infrastructure.IoC
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IOTPRepository, OTPRepository>();
+            services.AddScoped<IUserPrivateChatRepository, UserPrivateChatRepository>();
 
             // Notification Repositories
             services.AddScoped<INotificationRepository<AssociatedInfoNotification>, AssociatedInfoNotificationRepository>();
@@ -94,6 +96,27 @@ namespace Connectify.Infrastructure.IoC
 
                         ValidateLifetime = true,
                     };
+
+
+                    options.Events = new JwtBearerEvents()
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var path = context.HttpContext.Request.Path;
+                            if (path.StartsWithSegments("/chathub"))
+                            {
+                                context.Token = context.Request.Query["access_token"];
+                            }
+                            else
+                            {
+                                var token = Convert.ToString(context.HttpContext.Request.Headers["Authorization"]);
+                                if (token != null)
+                                    context.Token = token.Substring("Bearer".Length).Trim();
+                            }
+                            
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
 
@@ -117,6 +140,20 @@ namespace Connectify.Infrastructure.IoC
             services.AddScoped<IWelcomeEmailStrategy, WelcomeEmailStrategy>();
             services.AddScoped<IReceivedFriendRequestEmailStrategy, ReceivedFriendRequestEmailStrategy>();
 
+            // Add Cors Policies
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocal", policy =>
+                {
+                    policy.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
+            // SignalR
+            services.AddSignalR();
 
             return services;
         }

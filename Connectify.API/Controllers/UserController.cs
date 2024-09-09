@@ -7,7 +7,6 @@ using System.Security.Claims;
 
 namespace Connectify.API.Controllers
 {
-    [ApiController]
     [Route("/api/v{version:apiVersion}/users")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class UserController : ControllerBase
@@ -18,8 +17,20 @@ namespace Connectify.API.Controllers
             _userApplicationService = userApplicationService;
         }
 
+
         [HttpGet]
-        [Route("")]
+        [Route("current")]
+        public async Task<IActionResult> GetCurrentUserInfo()
+        {
+            Guid currentUserId = new Guid(HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+            var user = await _userApplicationService.GetCurrentUser(currentUserId);
+            if (user == null)
+                return NotFound(new {status = false, message = "user not found"});
+            return Ok(new {status = true, user = user});
+        }
+
+        [HttpGet]
+        [Route("all")]
         [MapToApiVersion("1.0")]
         public async Task<IActionResult> GetAllUsersV1()
         {
@@ -37,9 +48,9 @@ namespace Connectify.API.Controllers
             var token = await _userApplicationService.LoginUser(currentUserId);
 
             if (token == null)
-                return Unauthorized();
+                return Unauthorized(new {status = false, message="unvalid credentials"});
 
-            return Ok(token);
+            return Ok(new {status = true, token = token});
         }
 
         [HttpPost]

@@ -145,9 +145,18 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        public async Task<UserDto?> GetCurrentUser(Guid userId)
+        {
+            var result = await _userRepository.GetFullUserByIdAsync(userId);
+            if (result == null)
+                return null;
+
+            return new UserDto(result);
+        }
+
         public async Task<string?> LoginUser(Guid userId)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
+            var user = await _userRepository.GetMinimalUserByIdAsync(userId);
             if (user == null)
                 return null;
 
@@ -198,8 +207,8 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
 
         public async Task<bool> SendFriendRequest(Guid currentUserId, Guid receiverId)
         {
-            var receiver = await _userRepository.GetUserByIdAsync(receiverId);
-            var sender = await _userRepository.GetUserByIdAsync(currentUserId);
+            var receiver = await _userRepository.GetMinimalUserByIdAsync(receiverId);
+            var sender = await _userRepository.GetMinimalUserByIdAsync(currentUserId);
 
             if (receiver == null || sender == null)
                 return false;
@@ -243,7 +252,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
 
         public async Task<(bool, string)> UpdateUser(Guid currentUserId, IFormCollection form)
         {
-            var originalUser = await _userRepository.GetUserByIdAsync(currentUserId);
+            var originalUser = await _userRepository.GetMinimalUserByIdAsync(currentUserId);
             if (originalUser == null)
                 return (false, "user isn't exists to update");
             

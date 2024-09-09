@@ -288,3 +288,4 @@ C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\obj\Debug\net8.0\C
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\SendGrid.dll
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\StarkbankEcdsa.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\System.Web.Cors.dll

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Connectify.Domain.Enums;
 
 namespace Connectify.Application.DTOs
 {
@@ -17,7 +18,8 @@ namespace Connectify.Application.DTOs
         public bool IsVerified { get; set; } = false;
 
 
-        public List<ChatDto> Chats { get; set; } = new List<ChatDto>();
+        public List<ChatDto> PrivateChats { get; set; } = new List<ChatDto>();
+        public List<ChatDto> GroupChats { get; set; } = new List<ChatDto>();
         public List<UserMinimalDto> BlockedUsers { get; set; } = new List<UserMinimalDto>();
         public List<UserMinimalDto> Friends { get; set; } = new List<UserMinimalDto>();
         public List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
@@ -33,10 +35,17 @@ namespace Connectify.Application.DTOs
             Photo = user.Photo;
             IsVerified = user.IsVerified;
 
-            Chats = user.UserJoinedChats.Select(x => new ChatDto(x.Chat)).ToList();
+            PrivateChats = user.UserJoinedChats.Where(x => x.Chat.Type == ChatType.Normal)
+                                                .Select(x => new ChatDto(x.Chat, user.Id)).ToList();
+
+            GroupChats = user.UserJoinedChats.Where(x => x.Chat.Type == ChatType.Group)
+                                                .Select(x => new ChatDto(x.Chat, user.Id)).ToList();
+
             BlockedUsers = user.BlockedUsers.Select(x => new UserMinimalDto(x.BlockerUser)).ToList();
+
             Friends = user.Friends.Select(x => new UserMinimalDto(x.User2))
                     .Concat(user.FriendOf.Select(x => new UserMinimalDto(x.User1))).ToList();
+
             SentFriendRequests = user.SentFriendRequests;
             ReceivedFriendRequests = user.ReceivedFriendRequests;
             AssociatedInfoNotifications = user.AssociatedInfoNotifications.Select(x => new AssociatedInfoNotificationDto(x.AssoicatedUser, x)).ToList();

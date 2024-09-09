@@ -69,6 +69,10 @@ namespace Connectify.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("NVARCHAR");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Chats", (string)null);
@@ -303,6 +307,26 @@ namespace Connectify.Infrastructure.Migrations
                     b.ToTable("UserInfoNotifications", (string)null);
                 });
 
+            modelBuilder.Entity("Connectify.Domain.Entities.UserPrivateChat", b =>
+                {
+                    b.Property<Guid>("User1Id")
+                        .HasColumnType("UNIQUEIDENTIFIER");
+
+                    b.Property<Guid>("User2Id")
+                        .HasColumnType("UNIQUEIDENTIFIER");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("UNIQUEIDENTIFIER");
+
+                    b.HasKey("User1Id", "User2Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.HasIndex("User2Id");
+
+                    b.ToTable("UserPrivateChats", (string)null);
+                });
+
             modelBuilder.Entity("Connectify.Domain.Entities.UserSeenMessage", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -465,6 +489,33 @@ namespace Connectify.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Connectify.Domain.Entities.UserPrivateChat", b =>
+                {
+                    b.HasOne("Connectify.Domain.Entities.Chat", "Chat")
+                        .WithMany("UserPrivateChats")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Connectify.Domain.Entities.User", "User1")
+                        .WithMany("AsSender")
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Connectify.Domain.Entities.User", "User2")
+                        .WithMany("AsReceiver")
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("Connectify.Domain.Entities.UserSeenMessage", b =>
                 {
                     b.HasOne("Connectify.Domain.Entities.Message", "Message")
@@ -493,6 +544,8 @@ namespace Connectify.Infrastructure.Migrations
                 {
                     b.Navigation("Messages");
 
+                    b.Navigation("UserPrivateChats");
+
                     b.Navigation("Users");
                 });
 
@@ -508,6 +561,10 @@ namespace Connectify.Infrastructure.Migrations
 
             modelBuilder.Entity("Connectify.Domain.Entities.User", b =>
                 {
+                    b.Navigation("AsReceiver");
+
+                    b.Navigation("AsSender");
+
                     b.Navigation("AssociatedInfoNotifications");
 
                     b.Navigation("BlockedFrom");

@@ -1,4 +1,8 @@
-﻿using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+﻿using Connectify.Application.DTOs;
+using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+using Connectify.Application.Interfaces.RepositoriesInterfaces;
+using Connectify.Domain.Entities;
+using Connectify.Domain.Factories;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -10,9 +14,19 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
 {
     public class MessageApplicationService : IMessageApplicationService
     {
-        public Task<bool> CreateMessage(string content, IFormFile photo)
+        private readonly IMessageRepository _messageRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        public MessageApplicationService(IMessageRepository messageRepository, IUnitOfWork unitOfWork)
         {
-            throw new NotImplementedException();
+            _messageRepository = messageRepository;
+            _unitOfWork = unitOfWork;
+        }
+        public async Task<Message> CreateMessage(Guid senderId, Guid chatId, string content, string attachmentUrl)
+        {
+            Message message = MessagesFactory.CreateMessage(senderId, chatId, content, attachmentUrl);
+            await _messageRepository.AddAsync(message);
+            await _unitOfWork.SaveChangesAsync();
+            return message;
         }
 
         public Task<bool> DeleteMessage(int messageId)

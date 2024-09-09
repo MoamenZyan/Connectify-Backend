@@ -1,5 +1,9 @@
 ﻿using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+using Connectify.Application.Interfaces.RepositoriesInterfaces;
+using Connectify.Domain.Entities;
 using Connectify.Domain.Enums;
+using Connectify.Domain.Factories;
+using Connectify.Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -11,9 +15,56 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
 {
     public class ChatApplicationService : IChatApplicationService
     {
-        public Task<bool> CreateChat(IFormCollection chatData)
+        private readonly IChatService _chatService;
+        private readonly IChatRepository _chatRepository;
+        private readonly IUserChatRepository _userChatRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserPrivateChatRepository _userPrivateChatRepository;
+        public ChatApplicationService(IChatService chatService,
+                                        IUserChatRepository userChatRepository,
+                                        IChatRepository chatRepository,
+                                        IUnitOfWork untiOfWork,
+                                        IUserPrivateChatRepository userPrivateChatRepository)
+        {
+            _chatService = chatService;
+            _userChatRepository = userChatRepository;
+            _chatRepository = chatRepository;
+            _unitOfWork = untiOfWork;
+            _userPrivateChatRepository = userPrivateChatRepository;
+        }
+        public Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<(bool, Guid)> CreateNormalChat(Guid currentUserId, Guid chatUserId)
+        {
+           try
+           {
+                Chat chat = new Chat()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "",
+                    Description = "",
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                UserChat userChat1 = UserChatsFactory.CreateUserChat(currentUserId, chat.Id, UserRole.Member);
+                UserChat userChat2 = UserChatsFactory.CreateUserChat(chatUserId, chat.Id, UserRole.Member);
+                UserPrivateChat userPrivateChat = UserPrivateChatFactory.CreateUserPrivateChat(currentUserId, chatUserId, chat.Id);
+                await _chatRepository.AddAsync(chat);
+                await _userChatRepository.AddAsync(userChat1);
+                await _userChatRepository.AddAsync(userChat2);
+                await _userPrivateChatRepository.AddAsync(userPrivateChat);
+
+                await _unitOfWork.SaveChangesAsync();
+                return (true, chat.Id);
+           }
+           catch (Exception ex)
+           {
+               Console.WriteLine(ex);
+               return (false, default);
+           }
         }
 
         public Task<bool> DeleteChat(int chatId)
@@ -21,12 +72,12 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             throw new NotImplementedException();
         }
 
-        public Task<bool> UserJoinChat(int chatId, int userId, UserRole role)
+        public Task<bool> UserJoinGroupChat(int chatId, int userId, UserRole role)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> UserLeaveChat(int chatId, int userId)
+        public Task<bool> UserLeaveGroupChat(int chatId, int userId)
         {
             throw new NotImplementedException();
         }

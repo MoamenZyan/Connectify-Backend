@@ -34,26 +34,12 @@ namespace Connectify.Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.Users.Include(u => u.UserJoinedChats)
-                                        .Include(u => u.Messages)
-                                            .ThenInclude(x => x.Chat)
-                                        .Include(u => u.BlockedUsers)
-                                            .ThenInclude(x => x.BlockedUser)
-                                        .Include(u => u.BlockedFrom)
-                                        .Include(u => u.SeenMessages)
-                                        .Include(u => u.Friends)
-                                        .Include(u => u.FriendOf)
-                                        .Include(u => u.SentFriendRequests)
-                                            .ThenInclude(x => x.Receiver)
-                                        .Include(u => u.ReceivedFriendRequests)
-                                            .ThenInclude(x => x.Sender)
-                                        .Include(u => u.AssociatedInfoNotifications)
-                                        .Include(u => u.UserInfoNotifications)
-                                            .ThenInclude(x => x.Notification)
-                                        .Include(u => u.UserAssociatedInfoNotifications)
-                                        .AsSplitQuery()
-                                        .AsNoTracking()
-                                        .ToListAsync();
+            return await _context.Users.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<User?> GetMinimalUserByIdAsync(Guid id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)
@@ -61,9 +47,27 @@ namespace Connectify.Infrastructure.Repositories
             return await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
         }
 
-        public async Task<User?> GetUserByIdAsync(Guid id)
+        public async Task<User?> GetFullUserByIdAsync(Guid id)
         {
-            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Users.Include(u => u.UserJoinedChats)
+                                            .ThenInclude(x => x.Chat)
+                                                .ThenInclude(x => x.Users)
+                                                    .ThenInclude(x => x.User)
+                                        .Include(u => u.UserJoinedChats)
+                                            .ThenInclude(x => x.Chat)
+                                                .ThenInclude(x => x.Messages)
+                                        .Include(u => u.BlockedUsers)
+                                            .ThenInclude(x => x.BlockedUser)
+                                        .Include(u => u.BlockedFrom)
+                                            .ThenInclude(x => x.BlockerUser)
+                                        .Include(u => u.SeenMessages)
+                                            .ThenInclude(x => x.Message)
+                                        .Include(u => u.AssociatedInfoNotifications)
+                                        .Include(u => u.UserInfoNotifications)
+                                            .ThenInclude(x => x.Notification)
+                                        .Include(u => u.UserAssociatedInfoNotifications)
+                                        .AsSplitQuery()
+                                        .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<User?> GetUserByPhoneAsync(string phone)

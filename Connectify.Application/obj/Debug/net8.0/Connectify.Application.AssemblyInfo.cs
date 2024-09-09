@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Connectify.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14e0c43cbe51a25ad86138a0d5c7d538bc571e8a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a6625bd14b345e413be63ca845432885a747caa2")]
 [assembly: System.Reflection.AssemblyProductAttribute("Connectify.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Connectify.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

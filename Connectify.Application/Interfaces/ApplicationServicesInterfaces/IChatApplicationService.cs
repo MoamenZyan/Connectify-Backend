@@ -10,9 +10,10 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
 {
     public interface IChatApplicationService
     {
-        Task<bool> CreateChat(IFormCollection chatData);
+        Task<(bool, Guid)> CreateNormalChat(Guid currentUserId, Guid chatUserId);
+        Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData);
         Task<bool> DeleteChat(int chatId);
-        Task<bool> UserJoinChat(int chatId, int userId, UserRole role);
-        Task<bool> UserLeaveChat(int chatId, int userId);
+        Task<bool> UserJoinGroupChat(int chatId, int userId, UserRole role);
+        Task<bool> UserLeaveGroupChat(int chatId, int userId);
     }
 }

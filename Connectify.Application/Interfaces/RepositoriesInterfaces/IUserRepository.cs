@@ -9,7 +9,8 @@ namespace Connectify.Application.Interfaces.RepositoriesInterfaces
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<User?> GetUserByIdAsync(Guid id);
+        Task<User?> GetFullUserByIdAsync(Guid id);
+        Task<User?> GetMinimalUserByIdAsync(Guid id);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> GetUserByPhoneAsync(string phone);
         Task DeleteUserAsync(Guid id);

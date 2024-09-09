@@ -49,6 +49,7 @@ namespace Connectify.Infrastructure.Authentication
                 Password = credentials[1]
             };
 
+
             var result = await _userService.ValidateUserCredentials(userCredentials, _userRepository.GetUserByEmailAsync);
             if (!result.Item1)
                 return AuthenticateResult.Fail("Forbiden");

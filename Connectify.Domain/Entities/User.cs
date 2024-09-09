@@ -24,6 +24,8 @@ namespace Connectify.Domain.Entities
         public virtual List<UserSeenMessage> SeenMessages { get; set; } = new List<UserSeenMessage>();
         public virtual List<UserFriend> Friends { get; set; } = new List<UserFriend>();
         public virtual List<UserFriend> FriendOf { get; set; } = new List<UserFriend>();
+        public virtual List<UserPrivateChat> AsSender { get; set; } = new List<UserPrivateChat>();
+        public virtual List<UserPrivateChat> AsReceiver { get; set; } = new List<UserPrivateChat>();
         public virtual List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
         public virtual List<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
         public virtual List<AssociatedInfoNotification> AssociatedInfoNotifications { get; set; } = new List<AssociatedInfoNotification>();
