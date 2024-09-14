@@ -16,6 +16,7 @@ namespace Connectify.Domain.Entities
         public string Phone { get; set; } = null!;
         public string Photo { get; set; } = null!;
         public bool IsVerified { get; set; } = false;
+        public bool IsOnline { get; set; } = false;
 
         public virtual List<UserChat> UserJoinedChats { get; set; } = new List<UserChat>();
         public virtual List<Message> Messages { get; set; } = new List<Message>();

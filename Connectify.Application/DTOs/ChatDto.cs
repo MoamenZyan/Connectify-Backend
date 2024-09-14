@@ -16,7 +16,7 @@ namespace Connectify.Application.DTOs
         public DateTime CreatedAt { get; set; }
         public ChatType Type { get; set; }
 
-        public virtual List<MessageDto> Messages { get; set; } = new List<MessageDto>();
+        public virtual Dictionary<Guid, MessageDto> Messages { get; set; } = new Dictionary<Guid, MessageDto>();
         public virtual List<UserMinimalDto> Users { get; set; } = new List<UserMinimalDto>();
 
         public ChatDto(Chat chat, Guid currentUserId)
@@ -27,7 +27,7 @@ namespace Connectify.Application.DTOs
             CreatedAt = chat.CreatedAt;
             Type = chat.Type;
 
-            Messages = chat.Messages.Select(x => new MessageDto(x)).OrderBy(x => x.CreatedAt).ToList();
+            Messages = chat.Messages.Select(x => new MessageDto(x)).ToDictionary(x => x.Id, x => x);
             Users = chat.Users.Where(x => x.UserId != currentUserId).Select(x => new UserMinimalDto(x.User)).ToList();
         }
     }

@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Connectify.Domain.Enums;
 using Connectify.Domain.Factories;
 using Connectify.Application.DTOs;
-using Connectify.Domain.Entities;
 using Connectify.Application.Interfaces.UtilitesInterfaces;
-using Connectify.Application.Interfaces.ExternalNotificationsInterfaces;
-using Connectify.Application.Interfaces.ExternalNotificationsInterfaces.EmailStrategies;
+using Connectify.Domain.Entities;
+using Connectify.Application.Interfaces.AWSServicesInterfaces;
 
 namespace Connectify.Application.Services.EntitiesApplicationServices
 {
@@ -18,17 +17,11 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
         private readonly IFriendRequestRepository _friendRequestRepository;
         private readonly IUserFriendRepository _userFriendRepository;
         private readonly IUserBlocksRepository _userBlocksRepository;
-        private readonly INotificationService _notificationService;
-        private readonly INotificationRepository<InfoNotification> _infoNotificationRepository;
-        private readonly INotificationRepository<AssociatedInfoNotification> _associateInfoNotificationRepository;
-        private readonly IUserNotificationRepository<UserInfoNotification> _userInfoNotificationRepository;
-        private readonly IUserNotificationRepository<UserAssociatedInfoNotification> _userAssociatedInfoNotificationRepository;
         private readonly IUserService _userService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJWTService _jwtService;
-        private readonly IExternalNotificationContext _externalNotificationContext;
-        private readonly IWelcomeEmailStrategy _welcomeEmailStrategy;
-        private readonly IReceivedFriendRequestEmailStrategy _receivedFriendRequestEmailStrategy;
+        private readonly INotificationApplicationService _notificationApplicationService;
+        private readonly IPhotoService _photoService;
 
         public UserApplicationService(IUserRepository userRepository,
                                     IUserService userService,
@@ -36,15 +29,9 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
                                     IUserFriendRepository userFriendRepository,
                                     IUnitOfWork unitOfWork,
                                     IUserBlocksRepository userBlocksRepository,
-                                    INotificationService notificationService,
-                                    IUserNotificationRepository<UserAssociatedInfoNotification> userAssociatedInfoNotificationRepository,
-                                    IUserNotificationRepository<UserInfoNotification> userInfoNotificationRepository,
                                     IJWTService jwtService,
-                                    INotificationRepository<InfoNotification> infoNotificationRepository,
-                                    INotificationRepository<AssociatedInfoNotification> associateInfoNotificationRepository,
-                                    IExternalNotificationContext externalNotificationContext,
-                                    IWelcomeEmailStrategy welcomeEmailStrategy,
-                                    IReceivedFriendRequestEmailStrategy receivedFriendRequestEmailStrategy)
+                                    INotificationApplicationService notificationApplicationService,
+                                    IPhotoService photoService)
         {
             _userRepository = userRepository;
             _userService = userService;
@@ -52,15 +39,9 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             _userFriendRepository = userFriendRepository;
             _unitOfWork = unitOfWork;
             _userBlocksRepository = userBlocksRepository;
-            _notificationService = notificationService;
-            _userAssociatedInfoNotificationRepository = userAssociatedInfoNotificationRepository;
-            _userInfoNotificationRepository = userInfoNotificationRepository;
             _jwtService = jwtService;
-            _infoNotificationRepository = infoNotificationRepository;
-            _associateInfoNotificationRepository = associateInfoNotificationRepository;
-            _externalNotificationContext = externalNotificationContext;
-            _welcomeEmailStrategy = welcomeEmailStrategy;
-            _receivedFriendRequestEmailStrategy = receivedFriendRequestEmailStrategy;
+            _notificationApplicationService = notificationApplicationService;
+            _photoService = photoService;
         }
 
         // Accept Friend Request
@@ -169,18 +150,9 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             try
             {
                 var user = await _userService.CreateUser(form, _userRepository.GetUserByEmailAsync, _userRepository.GetUserByPhoneAsync);
-
-                var notification = _notificationService.CreateInfoNotification($"{user.Fname}, Welcome on board!");
-                var userNotification = UserNotificationFactory.CreateUserInfoNotification(notification.Id, user.Id);
-
-                await _infoNotificationRepository.AddAsync(notification);
-                await _userInfoNotificationRepository.AddAsync(userNotification);
                 await _userRepository.AddAsync(user);
-
-
-                _externalNotificationContext.SetStrategy(_welcomeEmailStrategy);
-                await Task.WhenAll(_unitOfWork.SaveChangesAsync(), _externalNotificationContext.Send(user.Fname, user.Email));
-
+                await _notificationApplicationService.SendWelcomeNotification(user);
+                await _unitOfWork.SaveChangesAsync();
 
                 return (true, "user created");
             }
@@ -205,6 +177,15 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        public List<UserDto>? SearchByUserName(string userName, Guid currentUserId)
+        {
+            var result = _userRepository.SearchByName(userName);
+            if (result == null || result?.Count() == 0)
+                return null;
+
+            return result?.Where(x => x.Id != currentUserId).Select(x => new UserDto(x)).ToList();
+        }
+
         public async Task<bool> SendFriendRequest(Guid currentUserId, Guid receiverId)
         {
             var receiver = await _userRepository.GetMinimalUserByIdAsync(receiverId);
@@ -213,18 +194,12 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             if (receiver == null || sender == null)
                 return false;
 
-            _externalNotificationContext.SetStrategy(_receivedFriendRequestEmailStrategy);
-            var data = new Dictionary<string, string>();
-            data.Add("SenderName", sender.Fname);
-
             var friendRequest = FriendRequestFactory.CreateFriendRequest(currentUserId, receiverId);
 
             try
             {
-                var addFriendRequest = _friendRequestRepository.AddAsync(friendRequest);
-                var sendEmail = _externalNotificationContext.Send(receiver.Fname, receiver.Email, data);
-
-                await Task.WhenAll(addFriendRequest, sendEmail);
+                await _friendRequestRepository.AddAsync(friendRequest);
+                await _notificationApplicationService.ReceivedFriendRequestNotification(sender, receiver);
                 await _unitOfWork.SaveChangesAsync();
 
                 return true;
@@ -242,6 +217,27 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             {
                 await _userBlocksRepository.RemoveBlockFromSpecificUserAsync(currentUserId, blockedId);
                 return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateProfilePhoto(IFormFile photo, Guid userId)
+        {
+            try
+            {
+                var result = await _photoService.UploadPhoto(photo, userId);
+                var user = await _userRepository.GetMinimalUserByIdAsync(userId);
+                if (user == null)
+                    return false;
+
+                user.Photo = result;
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+
             }
             catch (Exception ex)
             {
@@ -269,6 +265,48 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             {
                 Console.WriteLine(ex);
                 return (false, ex.Message);
+            }
+        }
+
+        public async Task<bool> UserIsOffline(Guid userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetMinimalUserByIdAsync(userId);
+                if (user == null)
+                    return false;
+                user.IsOnline = false;
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
+
+        public async Task<List<MessageDto>?> UserIsOnline(Guid userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetFullUserByIdAsync(userId);
+
+                if (user == null)
+                    return null;
+
+                user.IsOnline = true;
+                var messages = await _userRepository.GetAllReceivedMessages(userId);
+                if (messages == null)
+                    return null;
+                foreach (var message in messages)
+                    message.Status = MessageStatus.Sent;
+                return messages.Select(x => new MessageDto(x)).ToList();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
             }
         }
     }

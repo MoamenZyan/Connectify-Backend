@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "HYxp1OBAOtw=",
+  "dgSpecHash": "5vMTcihYB6A=",
   "success": true,
   "projectFilePath": "C:\\Users\\Overd\\source\\repos\\Connectify-Backend\\Connectify.Infrastructure\\Connectify.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Overd\\.nuget\\packages\\anglesharp\\0.17.1\\anglesharp.0.17.1.nupkg.sha512",
     "C:\\Users\\Overd\\.nuget\\packages\\anglesharp.css\\0.17.0\\anglesharp.css.0.17.0.nupkg.sha512",
+    "C:\\Users\\Overd\\.nuget\\packages\\awssdk.core\\3.7.400.19\\awssdk.core.3.7.400.19.nupkg.sha512",
+    "C:\\Users\\Overd\\.nuget\\packages\\awssdk.s3\\3.7.402.10\\awssdk.s3.3.7.402.10.nupkg.sha512",
     "C:\\Users\\Overd\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Overd\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
     "C:\\Users\\Overd\\.nuget\\packages\\bcrypt.net-core\\1.6.0\\bcrypt.net-core.1.6.0.nupkg.sha512",

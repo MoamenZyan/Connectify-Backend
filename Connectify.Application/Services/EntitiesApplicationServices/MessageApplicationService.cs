@@ -2,6 +2,7 @@
 using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
 using Connectify.Application.Interfaces.RepositoriesInterfaces;
 using Connectify.Domain.Entities;
+using Connectify.Domain.Enums;
 using Connectify.Domain.Factories;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -21,11 +22,12 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             _messageRepository = messageRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<Message> CreateMessage(Guid senderId, Guid chatId, string content, string attachmentUrl)
+        public async Task<Message> CreateMessage(Guid senderId, Guid chatId, string content, string attachmentUrl, Guid messageGuid, MessageStatus status)
         {
-            Message message = MessagesFactory.CreateMessage(senderId, chatId, content, attachmentUrl);
+            Message message = MessagesFactory.CreateMessage(senderId, chatId, content, attachmentUrl, messageGuid, status);
             await _messageRepository.AddAsync(message);
             await _unitOfWork.SaveChangesAsync();
+
             return message;
         }
 

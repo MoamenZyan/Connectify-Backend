@@ -26,6 +26,14 @@ using Connectify.Infrastructure.Services.ExternalNotificationsServices;
 using Connectify.Application.Interfaces.ExternalNotificationsInterfaces.EmailStrategies;
 using Connectify.Infrastructure.Services.ExternalNotificationsServices.EmailStrategies;
 using Microsoft.AspNetCore.SignalR;
+using Connectify.Application.Services.NotificationServices;
+using Connectify.Application.Services.NotificationService;
+using Connectify.Infrastructure.Configurations.AWSConfigurations;
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon;
+using Connectify.Application.Interfaces.AWSServicesInterfaces;
+using Connectify.Infrastructure.Services.AWSService;
 
 namespace Connectify.Infrastructure.IoC
 {
@@ -53,6 +61,10 @@ namespace Connectify.Infrastructure.IoC
             services.AddScoped<IUserNotificationRepository<UserAssociatedInfoNotification>, UserAssosicatedInfoNotificationRepository>();
             services.AddScoped<IUserNotificationRepository<UserInfoNotification>, UserInfoNotificationRepository>();
 
+            // Application Notification Services
+            services.AddScoped<IExternalNotificationApplicationService, ExternalNotificationApplicationService>();
+            services.AddScoped<IInternalNotificationApplicationService, InternalNotificationApplicationService>();
+            services.AddScoped<INotificationApplicationService, NotificationApplicationService>();
 
             // Junction Entities Repositories
             services.AddScoped<IFriendRequestRepository, FriendRequestRepository>();
@@ -154,6 +166,18 @@ namespace Connectify.Infrastructure.IoC
 
             // SignalR
             services.AddSignalR();
+
+            // AWS
+            var awsConfigs = configuration.GetSection("AWS").Get<AWSConfigurations>();
+            var credentials = new BasicAWSCredentials(awsConfigs!.AccessKey, awsConfigs.SecretAccessKey);
+            var configs = new AmazonS3Config()
+            {
+                RegionEndpoint = RegionEndpoint.GetBySystemName(awsConfigs.Region),
+            };
+            services.AddSingleton<IAmazonS3>(sp => new AmazonS3Client(credentials, configs));
+            services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<IAttachmentsService, AttachmentsService>();
+
 
             return services;
         }

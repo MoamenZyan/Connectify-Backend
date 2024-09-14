@@ -1,5 +1,6 @@
 ﻿using Connectify.Application.DTOs;
 using Connectify.Domain.Entities;
+using Connectify.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
 {
     public interface IMessageApplicationService
     {
-        Task<Message> CreateMessage(Guid senderId, Guid chatId, string content, string attachmentUrl);
+        Task<Message> CreateMessage(Guid senderId, Guid chatId, string content, string attachmentUrl, Guid messageGuid, MessageStatus status);
         Task<bool> DeleteMessage(int messageId);
         Task<bool> UpdateMessage(int messageId, string content);
         Task<bool> ViewMessage(int messageId, int viewerId);

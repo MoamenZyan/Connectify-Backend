@@ -200,6 +200,9 @@ namespace Connectify.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("VARCHAR");
 
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("BIT");
+
                     b.Property<bool>("IsVerified")
                         .HasColumnType("BIT");
 

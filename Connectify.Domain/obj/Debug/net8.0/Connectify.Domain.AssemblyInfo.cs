@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Connectify.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a6625bd14b345e413be63ca845432885a747caa2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2edbd91ae168464a9237ea05240e7bde98d6c48d")]
 [assembly: System.Reflection.AssemblyProductAttribute("Connectify.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Connectify.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

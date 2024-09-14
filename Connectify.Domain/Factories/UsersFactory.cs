@@ -25,6 +25,7 @@ namespace Connectify.Domain.Factories
                 Phone = sanitizer.Sanitize(Convert.ToString(data["Phone"])),
                 Photo = "",
                 IsVerified = false,
+                IsOnline = false,
             };
             return user;
         }

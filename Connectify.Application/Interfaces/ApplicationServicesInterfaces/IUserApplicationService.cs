@@ -10,6 +10,7 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
 {
     public interface IUserApplicationService
     {
+        List<UserDto>? SearchByUserName(string userName, Guid currentUserId);
         Task<(bool, string)> RegisterUser(IFormCollection form);
         Task<(bool, string)> UpdateUser(Guid currentUserId, IFormCollection form);
         Task<bool> DeleteUser(Guid currentUserId);
@@ -22,5 +23,8 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
         Task<List<UserDto>?> GetAllUsers(Guid currentUserId);
         Task<string?> LoginUser(Guid userId);
         Task<UserDto?> GetCurrentUser(Guid userId);
+        Task<List<MessageDto>?> UserIsOnline(Guid userId);
+        Task<bool> UserIsOffline(Guid userId);
+        Task<bool> UpdateProfilePhoto(IFormFile photo, Guid userId);
     }
 }

@@ -13,6 +13,9 @@ namespace Connectify.Application.Interfaces.RepositoriesInterfaces
         Task<User?> GetMinimalUserByIdAsync(Guid id);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> GetUserByPhoneAsync(string phone);
+        Task UserIsOnline(Guid userId);
+        Task<List<Message>?> GetAllReceivedMessages(Guid userId);
+        IEnumerable<User>? SearchByName(string name);
         Task DeleteUserAsync(Guid id);
         void UpdateUser(User user);
     }

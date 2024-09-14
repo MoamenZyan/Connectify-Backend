@@ -1,4 +1,6 @@
-﻿using Connectify.Domain.Enums;
+﻿using Connectify.Application.DTOs;
+using Connectify.Domain.Entities;
+using Connectify.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,7 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
     {
         Task<(bool, Guid)> CreateNormalChat(Guid currentUserId, Guid chatUserId);
         Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData);
+        Task<ChatDto?> GetPrivateChat(Guid currentUserId, Guid receiverId);
         Task<bool> DeleteChat(int chatId);
         Task<bool> UserJoinGroupChat(int chatId, int userId, UserRole role);
         Task<bool> UserLeaveGroupChat(int chatId, int userId);

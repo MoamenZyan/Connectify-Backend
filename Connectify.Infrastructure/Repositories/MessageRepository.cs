@@ -1,5 +1,6 @@
 ﻿using Connectify.Application.Interfaces.RepositoriesInterfaces;
 using Connectify.Domain.Entities;
+using Connectify.Domain.Enums;
 using Connectify.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -54,6 +55,19 @@ namespace Connectify.Infrastructure.Repositories
         public void UpdateMessageAsync(Message message)
         {
             _context.Messages.Remove(message);
+        }
+
+        public async Task<List<Message>?> UpdateMessagesSeenAsync(string[] messagesGuid)
+        {
+            var guids = messagesGuid.Select(x => new Guid(x));
+
+            var messages = _context.Messages.Include(x => x.Sender).Where(x => guids.Contains(x.Id));
+            foreach(var message in messages)
+            {
+                message.Status = MessageStatus.Seen;
+            }
+            await _context.SaveChangesAsync();
+            return await messages.ToListAsync();
         }
     }
 }

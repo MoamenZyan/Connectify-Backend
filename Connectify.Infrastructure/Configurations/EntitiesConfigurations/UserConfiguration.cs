@@ -53,6 +53,10 @@ namespace Connectify.Infrastructure.Configurations.EntitiesConfigurations
             builder.Property(x => x.IsVerified)
                     .HasColumnType("BIT")
                     .IsRequired();
+
+            builder.Property(x => x.IsOnline)
+                    .HasColumnType("BIT")
+                    .IsRequired();
         }
     }
 }

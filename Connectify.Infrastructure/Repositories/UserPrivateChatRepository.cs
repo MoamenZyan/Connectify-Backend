@@ -22,13 +22,18 @@ namespace Connectify.Infrastructure.Repositories
             await _context.AddAsync(item);
         }
 
-        public async Task<Guid> CheckTwoUsersChat(Guid senderId, Guid receiverId)
+        public async Task<Chat?> GetPrivateChat(Guid senderId, Guid receiverId)
         {
-            var chat = await _context.UserPrivateChats.FirstOrDefaultAsync(x => (x.User1Id == senderId && x.User2Id == receiverId) 
+            var chat = await _context.UserPrivateChats.Include(x => x.Chat)
+                                                        .ThenInclude(x => x.Users)
+                                                            .ThenInclude(x => x.User)
+                                                        .Include(x => x.Chat)
+                                                            .ThenInclude(x => x.Messages)
+                                                        .FirstOrDefaultAsync(x => (x.User1Id == senderId && x.User2Id == receiverId) 
                                                         || (x.User2Id == senderId && x.User1Id == receiverId));
             if (chat == null)
                 return default;
-            return chat.ChatId;
+            return chat.Chat;
         }
 
         public async Task DeleteTwoUsersChat(Guid senderId, Guid receiverId)
@@ -46,5 +51,6 @@ namespace Connectify.Infrastructure.Repositories
         {
             return await _context.UserPrivateChats.ToListAsync();
         }
+
     }
 }

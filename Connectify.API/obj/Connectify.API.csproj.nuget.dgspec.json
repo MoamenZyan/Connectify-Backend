@@ -291,6 +291,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "AWSSDK.S3": {
+              "target": "Package",
+              "version": "[3.7.402.10, )"
+            },
             "Microsoft.AspNet.Cors": {
               "target": "Package",
               "version": "[5.3.0, )"

@@ -139,7 +139,7 @@ namespace Connectify.Domain.Services
 
         public async Task<(bool, string?)> ValidateUserCredentials(UserCredentials userCredentials, Func<string, Task<User?>> func)
         {
-            var user = await func(userCredentials.Email);
+            var user = await func(userCredentials.Email.ToLower());
             if (user == null)
                 return (false, null);
 

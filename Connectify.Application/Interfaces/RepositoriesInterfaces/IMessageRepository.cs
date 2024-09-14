@@ -13,5 +13,6 @@ namespace Connectify.Application.Interfaces.RepositoriesInterfaces
         IEnumerable<Message> GetAllUserMessagesInChat(Guid chatId, Guid userId);
         Task RemoveMessageAsync(Guid messageId);
         void UpdateMessageAsync(Message message);
+        Task<List<Message>?> UpdateMessagesSeenAsync(string[] messagesGuid);
     }
 }

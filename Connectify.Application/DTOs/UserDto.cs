@@ -16,6 +16,7 @@ namespace Connectify.Application.DTOs
         public string Phone { get; set; } = null!;
         public string Photo { get; set; } = null!;
         public bool IsVerified { get; set; } = false;
+        public bool IsOnline { get; set; } = false;
 
 
         public List<ChatDto> PrivateChats { get; set; } = new List<ChatDto>();
@@ -34,6 +35,7 @@ namespace Connectify.Application.DTOs
             Phone = user.Phone;
             Photo = user.Photo;
             IsVerified = user.IsVerified;
+            IsOnline = user.IsOnline;
 
             PrivateChats = user.UserJoinedChats.Where(x => x.Chat.Type == ChatType.Normal)
                                                 .Select(x => new ChatDto(x.Chat, user.Id)).ToList();
@@ -59,6 +61,7 @@ namespace Connectify.Application.DTOs
         public string Email { get; set; } = null!;
         public string Phone { get; set; } = null!;
         public string Photo { get; set; } = null!;
+        public bool IsOnline { get; set; }
         public UserMinimalDto(User user)
         {
             Id = user.Id;
@@ -66,6 +69,7 @@ namespace Connectify.Application.DTOs
             Email = user.Email;
             Phone = user.Phone;
             Photo = user.Photo;
+            IsOnline = user.IsOnline;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+﻿using Connectify.Application.DTOs;
+using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
 using Connectify.Application.Interfaces.RepositoriesInterfaces;
 using Connectify.Domain.Entities;
 using Connectify.Domain.Enums;
@@ -58,6 +59,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
                 await _userPrivateChatRepository.AddAsync(userPrivateChat);
 
                 await _unitOfWork.SaveChangesAsync();
+                
                 return (true, chat.Id);
            }
            catch (Exception ex)
@@ -67,9 +69,19 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
            }
         }
 
+
         public Task<bool> DeleteChat(int chatId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ChatDto?> GetPrivateChat(Guid currentUserId, Guid receiverId)
+        {
+            var chat = await _userPrivateChatRepository.GetPrivateChat(currentUserId, receiverId);
+            if (chat == null)
+                return null;
+
+            return new ChatDto(chat, currentUserId);
         }
 
         public Task<bool> UserJoinGroupChat(int chatId, int userId, UserRole role)

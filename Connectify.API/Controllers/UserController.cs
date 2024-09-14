@@ -1,5 +1,6 @@
 ﻿using Connectify.Application.DTOs;
 using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+using Connectify.Application.Interfaces.AWSServicesInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,16 @@ namespace Connectify.API.Controllers
             if (user == null)
                 return NotFound(new {status = false, message = "user not found"});
             return Ok(new {status = true, user = user});
+        }
+
+
+        [HttpGet]
+        [Route("search")]
+        public IActionResult SearchByName([FromQuery] string name)
+        {
+            Guid currentUserId = new Guid(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+            var result = _userApplicationService.SearchByUserName(name, currentUserId);
+            return Ok(new { users = result });
         }
 
         [HttpGet]
@@ -88,6 +99,20 @@ namespace Connectify.API.Controllers
                 return new JsonResult(new {status = false, message = "error in sending friend request"}) { StatusCode = 500 };
 
             return Ok(new { status = true, message = "friend request sent!" });
+        }
+
+        [HttpPost]
+        [Route("upload-photo")]
+        public async Task<IActionResult> UploadProfilePhoto([FromForm] IFormFile photo)
+        {
+            var userId = new Guid(HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+
+            var result = await _userApplicationService.UpdateProfilePhoto(photo, userId);
+            if (result)
+                return Ok(new { status = true, message = "photo uploaded successfully!" });
+
+            return BadRequest(new { status = true, message = "photo uploading failed" });
+
         }
     }
 }

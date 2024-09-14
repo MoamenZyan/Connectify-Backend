@@ -289,3 +289,5 @@ C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\N
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\SendGrid.dll
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\StarkbankEcdsa.dll
 C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\System.Web.Cors.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\AWSSDK.Core.dll
+C:\Users\Overd\source\repos\Connectify-Backend\Connectify.API\bin\Debug\net8.0\AWSSDK.S3.dll

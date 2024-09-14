@@ -79,5 +79,32 @@ namespace Connectify.Infrastructure.Repositories
         {
             _context.Users.Update(user);
         }
+
+        public IEnumerable<User>? SearchByName(string name)
+        {
+            return _context.Users.Where(x => (x.Fname + " " + x.Lname).Contains(name));
+        }
+
+        public async Task<List<Message>?> GetAllReceivedMessages(Guid userId)
+        {
+            var user = await _context.Users.Include(x => x.UserJoinedChats)
+                                            .ThenInclude(x => x.Chat)
+                                            .ThenInclude(x => x.Messages)
+                                            .FirstOrDefaultAsync(x => x.Id == userId);
+            if (user == null)
+                return null;
+
+            return user.UserJoinedChats.SelectMany(x => x.Chat.Messages).Where(x => x.SenderId != userId &&
+                                                    x.Status == Domain.Enums.MessageStatus.Saved)
+                                                    .ToList();
+
+        }
+
+        public async Task UserIsOnline(Guid userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (user == null) return;
+            user.IsOnline = true;
+        }
     }
 }

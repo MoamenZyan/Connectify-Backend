@@ -8,8 +8,10 @@ namespace Connectify.Domain.Enums
 {
     public enum MessageStatus
     {
-        Sent,
         Sending,
+        Saved,
+        Sent,
+        Seen,
         Failed
     }
 }
