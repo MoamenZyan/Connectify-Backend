@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Ganss.Xss;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Http;
+using System.Numerics;
 
 namespace Connectify.Domain.Factories
 {
@@ -15,18 +16,23 @@ namespace Connectify.Domain.Factories
         static HtmlSanitizer sanitizer = new HtmlSanitizer();
         public static User CreateUser(IFormCollection data)
         {
-            var user = new User()
-            {
-                Id = Guid.NewGuid(),
-                Fname = sanitizer.Sanitize(Convert.ToString(data["Fname"])),
-                Lname = sanitizer.Sanitize(Convert.ToString(data["Lname"])),
-                Email = sanitizer.Sanitize(Convert.ToString(data["Email"])),
-                Password = BCrypt.Net.BCrypt.HashPassword(Convert.ToString(data["password"]), 10),
-                Phone = sanitizer.Sanitize(Convert.ToString(data["Phone"])),
-                Photo = "",
-                IsVerified = false,
-                IsOnline = false,
-            };
+            var user = new User();
+            user.Id = Guid.NewGuid();
+            if (data.ContainsKey("Fname"))
+                user.Fname = sanitizer.Sanitize(Convert.ToString(data["Fname"]));
+
+            if (data.ContainsKey("Lname"))
+                user.Lname = sanitizer.Sanitize(Convert.ToString(data["Lname"]));
+
+            if (data.ContainsKey("Email"))
+                user.Email = sanitizer.Sanitize(Convert.ToString(data["Email"]));
+
+            if (data.ContainsKey("Phone"))
+                user.Phone = sanitizer.Sanitize(Convert.ToString(data["Phone"]));
+
+            if (data.ContainsKey("Password"))
+                user.Password = BCrypt.Net.BCrypt.HashPassword(Convert.ToString(data["Password"]), 10);
+
             return user;
         }
     }

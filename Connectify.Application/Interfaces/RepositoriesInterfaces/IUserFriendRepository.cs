@@ -10,5 +10,6 @@ namespace Connectify.Application.Interfaces.RepositoriesInterfaces
     public interface IUserFriendRepository : IRepository<UserFriend>
     {
         Task RemoveFriendAsync(Guid userId1, Guid userId2);
+        Task<UserFriend?> GetFriend(Guid userId1, Guid userId2);
     }
 }

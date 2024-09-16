@@ -30,6 +30,19 @@ namespace Connectify.API.Controllers
             return Ok(new {status = true, user = user});
         }
 
+        [HttpPatch]
+        [Route("")]
+        public async Task<IActionResult> UpdateUser()
+        {
+            Guid currentUserId = new Guid(HttpContext.User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+            var body = await Request.ReadFormAsync();
+            var result = await _userApplicationService.UpdateUser(currentUserId, body);
+            if (!result.Item1)
+                return NotFound(new { status = false, message = result.Item2 });
+            return Ok(new { status = true, message = "user updated successully" });
+        }
+
+
 
         [HttpGet]
         [Route("search")]
@@ -97,6 +110,30 @@ namespace Connectify.API.Controllers
             var result = await _userApplicationService.SendFriendRequest(currentUserId, receiverId);
             if (!result)
                 return new JsonResult(new {status = false, message = "error in sending friend request"}) { StatusCode = 500 };
+
+            return Ok(new { status = true, message = "friend request sent!" });
+        }
+
+        [HttpDelete]
+        [Route("friend-request/{receiverId}")]
+        public async Task<IActionResult> DeleteFriendRequest(Guid receiverId)
+        {
+            var currentUserId = new Guid(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+            var result = await _userApplicationService.RemoveFriendRequest(currentUserId, receiverId);
+            if (!result)
+                return new JsonResult(new { status = false, message = "error in deleting friend request" }) { StatusCode = 500 };
+
+            return Ok(new { status = true, message = "friend request deleted!" });
+        }
+
+        [HttpPost]
+        [Route("accept-friend-request/{senderId}")]
+        public async Task<IActionResult> AcceptFriendRequest(Guid senderId)
+        {
+            var currentUserId = new Guid(User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+            var result = await _userApplicationService.AcceptFriendRequest(currentUserId, senderId);
+            if (!result)
+                return new JsonResult(new { status = false, message = "error in sending friend request" }) { StatusCode = 500 };
 
             return Ok(new { status = true, message = "friend request sent!" });
         }

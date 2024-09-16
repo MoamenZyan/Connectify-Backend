@@ -49,7 +49,8 @@ namespace Connectify.Infrastructure.Repositories
 
         public async Task<User?> GetFullUserByIdAsync(Guid id)
         {
-            return await _context.Users.Include(u => u.UserJoinedChats)
+            return await _context.Users.Include(u => u.AssociatedInfoNotifications)
+                                        .Include(u => u.UserJoinedChats)
                                             .ThenInclude(x => x.Chat)
                                                 .ThenInclude(x => x.Users)
                                                     .ThenInclude(x => x.User)
@@ -62,10 +63,13 @@ namespace Connectify.Infrastructure.Repositories
                                             .ThenInclude(x => x.BlockerUser)
                                         .Include(u => u.SeenMessages)
                                             .ThenInclude(x => x.Message)
-                                        .Include(u => u.AssociatedInfoNotifications)
                                         .Include(u => u.UserInfoNotifications)
                                             .ThenInclude(x => x.Notification)
                                         .Include(u => u.UserAssociatedInfoNotifications)
+                                            .ThenInclude(x => x.Notification)
+                                                .ThenInclude(x => x.AssoicatedUser)
+                                        .Include(x => x.SentFriendRequests)
+                                        .Include(x => x.ReceivedFriendRequests)
                                         .AsSplitQuery()
                                         .FirstOrDefaultAsync(x => x.Id == id);
         }

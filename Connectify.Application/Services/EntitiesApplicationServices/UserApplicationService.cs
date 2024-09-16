@@ -8,6 +8,8 @@ using Connectify.Application.DTOs;
 using Connectify.Application.Interfaces.UtilitesInterfaces;
 using Connectify.Domain.Entities;
 using Connectify.Application.Interfaces.AWSServicesInterfaces;
+using Connectify.Application.Interfaces.HubInterfaces;
+using Hangfire;
 
 namespace Connectify.Application.Services.EntitiesApplicationServices
 {
@@ -17,11 +19,13 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
         private readonly IFriendRequestRepository _friendRequestRepository;
         private readonly IUserFriendRepository _userFriendRepository;
         private readonly IUserBlocksRepository _userBlocksRepository;
+        private readonly IChatApplicationService _chatApplicationService;
         private readonly IUserService _userService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJWTService _jwtService;
         private readonly INotificationApplicationService _notificationApplicationService;
         private readonly IPhotoService _photoService;
+        
 
         public UserApplicationService(IUserRepository userRepository,
                                     IUserService userService,
@@ -31,7 +35,8 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
                                     IUserBlocksRepository userBlocksRepository,
                                     IJWTService jwtService,
                                     INotificationApplicationService notificationApplicationService,
-                                    IPhotoService photoService)
+                                    IPhotoService photoService,
+                                    IChatApplicationService chatApplicationService)
         {
             _userRepository = userRepository;
             _userService = userService;
@@ -42,6 +47,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             _jwtService = jwtService;
             _notificationApplicationService = notificationApplicationService;
             _photoService = photoService;
+            _chatApplicationService = chatApplicationService;
         }
 
         // Accept Friend Request
@@ -57,7 +63,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             {
                 _friendRequestRepository.UpdateFriendRequest(friendRequest);
                 await _userFriendRepository.AddAsync(userFriend);
-                await _unitOfWork.SaveChangesAsync();
+                await _chatApplicationService.CreateNormalChat(currentUserId, senderId);
                 return true;
             }
             catch (Exception ex)
@@ -67,6 +73,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Block user
         public async Task<bool> BlockUser(Guid currentUserId, Guid blockedId)
         {
             var userBlock = UserBlocksFactory.CreateUserBlock(currentUserId, blockedId);
@@ -84,6 +91,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
 
         }
 
+        // Decline friend request
         public async Task<bool> DeclineFriendRequest(Guid currentUserId, Guid senderId)
         {
             try
@@ -98,6 +106,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Delete user
         public async Task<bool> DeleteUser(Guid currentUserId)
         {
             try
@@ -112,6 +121,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Get all users dtos
         public async Task<List<UserDto>?> GetAllUsers(Guid currentUserId)
         {
             try
@@ -126,6 +136,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Get current user (Logged in user)
         public async Task<UserDto?> GetCurrentUser(Guid userId)
         {
             var result = await _userRepository.GetFullUserByIdAsync(userId);
@@ -135,6 +146,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             return new UserDto(result);
         }
 
+        // Login user => generate token
         public async Task<string?> LoginUser(Guid userId)
         {
             var user = await _userRepository.GetMinimalUserByIdAsync(userId);
@@ -145,14 +157,20 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             return token;
         }
 
+        // Create new user
         public async Task<(bool, string)> RegisterUser(IFormCollection form)
         {
             try
             {
                 var user = await _userService.CreateUser(form, _userRepository.GetUserByEmailAsync, _userRepository.GetUserByPhoneAsync);
                 await _userRepository.AddAsync(user);
-                await _notificationApplicationService.SendWelcomeNotification(user);
+
+
                 await _unitOfWork.SaveChangesAsync();
+
+                BackgroundJob.Schedule(() =>
+                _notificationApplicationService.SendWelcomeNotification(user),
+                TimeSpan.FromMinutes(1));
 
                 return (true, "user created");
             }
@@ -163,6 +181,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Remove friend request
         public async Task<bool> RemoveFriendRequest(Guid currentUserId, Guid senderId)
         {
             try
@@ -177,6 +196,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Search users by name
         public List<UserDto>? SearchByUserName(string userName, Guid currentUserId)
         {
             var result = _userRepository.SearchByName(userName);
@@ -186,6 +206,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             return result?.Where(x => x.Id != currentUserId).Select(x => new UserDto(x)).ToList();
         }
 
+        // send friend request
         public async Task<bool> SendFriendRequest(Guid currentUserId, Guid receiverId)
         {
             var receiver = await _userRepository.GetMinimalUserByIdAsync(receiverId);
@@ -199,8 +220,9 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             try
             {
                 await _friendRequestRepository.AddAsync(friendRequest);
-                await _notificationApplicationService.ReceivedFriendRequestNotification(sender, receiver);
                 await _unitOfWork.SaveChangesAsync();
+
+                BackgroundJob.Enqueue(() => _notificationApplicationService.ReceivedFriendRequestNotification(new UserDto(sender), new UserDto(receiver)));
 
                 return true;
             }
@@ -211,6 +233,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Unblock user
         public async Task<bool> UnblockUser(Guid currentUserId, Guid blockedId)
         {
             try
@@ -225,6 +248,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Update profile photo
         public async Task<bool> UpdateProfilePhoto(IFormFile photo, Guid userId)
         {
             try
@@ -246,6 +270,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // Update user info
         public async Task<(bool, string)> UpdateUser(Guid currentUserId, IFormCollection form)
         {
             var originalUser = await _userRepository.GetMinimalUserByIdAsync(currentUserId);
@@ -268,6 +293,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // User became offline
         public async Task<bool> UserIsOffline(Guid userId)
         {
             try
@@ -286,6 +312,7 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
             }
         }
 
+        // User became online
         public async Task<List<MessageDto>?> UserIsOnline(Guid userId)
         {
             try

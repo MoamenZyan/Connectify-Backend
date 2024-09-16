@@ -26,49 +26,73 @@ namespace Connectify.Domain.Services
             if (data == null) 
                 throw new ArgumentNullException("data is null");
 
-            if (Convert.ToString(data["Fname"]) == null || Convert.ToString(data["Fname"]).Length == 0)
-                throw new Exception("Enter first name");
+            if (data.ContainsKey("Fname"))
+            {
+                if (Convert.ToString(data["Fname"]) == null || Convert.ToString(data["Fname"]).Length == 0)
+                    throw new Exception("Enter first name");
 
-            if (!nameRegex.IsMatch(data["Fname"]))
-                throw new Exception("First name must don't exceed 40 character and doesn't start with a number or have spaces");
+                if (!nameRegex.IsMatch(data["Fname"]))
+                    throw new Exception("First name must don't exceed 40 character and doesn't start with a number or have spaces");
+            }
 
-            if (Convert.ToString(data["Lname"]) == null || Convert.ToString(data["Lname"]).Length == 0)
-                throw new Exception("Enter last name");
+            if (data.ContainsKey("Lname"))
+            {
+                if (Convert.ToString(data["Lname"]) == null || Convert.ToString(data["Lname"]).Length == 0)
+                    throw new Exception("Enter last name");
 
-            if (!nameRegex.IsMatch(data["Lname"]))
-                throw new Exception("Last name must don't exceed 40 character and doesn't start with a number or have spaces");
+                if (!nameRegex.IsMatch(data["Lname"]))
+                    throw new Exception("Last name must don't exceed 40 character and doesn't start with a number or have spaces");
+            }
 
-            if (Convert.ToString(data["Email"]) == null || Convert.ToString(data["Email"]).Length == 0)
-                throw new Exception("Enter email");
+            if (data.ContainsKey("Email"))
+            {
+                if (Convert.ToString(data["Email"]) == null || Convert.ToString(data["Email"]).Length == 0)
+                    throw new Exception("Enter email");
 
-            if ((await checkUserEmail(data["Email"])) != null)
-                throw new Exception("Email already exists");
+                if ((await checkUserEmail(data["Email"])) != null)
+                    throw new Exception("Email already exists");
 
-            if (!emailRegex.IsMatch(data["Email"]))
-                throw new Exception("Incorrect email");
+                if (!emailRegex.IsMatch(data["Email"]))
+                    throw new Exception("Incorrect email");
+            }
 
-            if (Convert.ToString(data["Password"]) == null || Convert.ToString(data["Password"]).Length < 10)
-                throw new Exception("Password must be over 10 characters and digits");
+            if (data.ContainsKey("Password"))
+            {
+                if (Convert.ToString(data["Password"]) == null || Convert.ToString(data["Password"]).Length < 10)
+                    throw new Exception("Password must be over 10 characters and digits");
+            }
 
-            if (Convert.ToString(data["Phone"]) == null || Convert.ToString(data["Phone"]).Length == 0)
-                throw new Exception("Enter phone");
+            if (data.ContainsKey("Phone"))
+            {
+                if (Convert.ToString(data["Phone"]) == null || Convert.ToString(data["Phone"]).Length == 0)
+                    throw new Exception("Enter phone");
 
-            if ((await checkUserPhone(data["Phone"])) != null)
-                throw new Exception("Phone already exists");
+                if ((await checkUserPhone(data["Phone"])) != null)
+                    throw new Exception("Phone already exists");
 
-            if (!phoneRegex.IsMatch(data["Phone"]))
-                throw new Exception("Phone must be in egypt");
+                if (!phoneRegex.IsMatch(data["Phone"]))
+                    throw new Exception("Phone must be in egypt");
+            }
 
             return UsersFactory.CreateUser(data);
         }
 
         public void UpdateUser(User originalUser, User updatedUser)
         {
-            originalUser.Fname = updatedUser.Fname;
-            originalUser.Lname = updatedUser.Lname;
-            originalUser.Email = updatedUser.Email;
-            originalUser.Password = updatedUser.Password;
-            originalUser.Phone = updatedUser.Phone;
+            if (updatedUser.Fname != null)
+                originalUser.Fname = updatedUser.Fname;
+
+            if (updatedUser.Lname != null)
+                originalUser.Lname = updatedUser.Lname;
+
+            if (updatedUser.Email != null)
+                originalUser.Email = updatedUser.Email;
+
+            if (updatedUser.Password != null)
+                originalUser.Password = updatedUser.Password;
+
+            if (updatedUser.Phone != null)
+                originalUser.Phone = updatedUser.Phone;
         }
 
         public async Task ValidateEmail(string email, Func<string, Task<User?>> checkUserEmail)

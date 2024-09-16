@@ -23,11 +23,12 @@ namespace Connectify.Domain.Services
             return infoNotification;
         }
 
-        public AssociatedInfoNotification CreateAssociatedUserNotification(User associatedUser, string content)
+        public AssociatedInfoNotification CreateAssociatedUserNotification(Guid associatedUserId, string content)
         {
             AssociatedInfoNotification associatedInfoNotification = new AssociatedInfoNotification()
             {
-                AssoicatedUserId = associatedUser.Id,
+                Id = Guid.NewGuid(),
+                AssoicatedUserId = associatedUserId,
                 Content = content,
                 CreatedAt = DateTime.Now,
                 Type = Enums.NotificationType.UserAssociatedInfo,

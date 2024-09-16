@@ -1,4 +1,5 @@
-﻿using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+﻿using Connectify.Application.DTOs;
+using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
 using Connectify.Application.Interfaces.ExternalNotificationsInterfaces;
 using Connectify.Application.Interfaces.ExternalNotificationsInterfaces.EmailStrategies;
 using Connectify.Application.Interfaces.RepositoriesInterfaces;
@@ -23,7 +24,7 @@ namespace Connectify.Application.Services.NotificationService
             _externalNotificationService = externalNotificationService;
 
         }
-        public async Task ReceivedFriendRequestNotification(User sender, User receiver)
+        public async Task ReceivedFriendRequestNotification(UserDto sender, UserDto receiver)
         {
             await _internalNotificationService.ReceivedFriendRequestNotification(sender, receiver);
             await _externalNotificationService.ReceivedFriendRequestEmailNotification(sender, receiver);
@@ -31,8 +32,8 @@ namespace Connectify.Application.Services.NotificationService
 
         public async Task SendWelcomeNotification(User receiver)
         {
-            await _internalNotificationService.WelcomeNotification(receiver);
-            await _externalNotificationService.WelcomeEmailNotification(receiver);
+            await Task.WhenAll(_internalNotificationService.WelcomeNotification(receiver),
+                                _externalNotificationService.WelcomeEmailNotification(receiver));
         }
     }
 }

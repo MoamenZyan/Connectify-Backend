@@ -6,11 +6,6 @@ using Connectify.Domain.Enums;
 using Connectify.Domain.Factories;
 using Connectify.Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Connectify.Application.Services.EntitiesApplicationServices
 {
@@ -19,36 +14,52 @@ namespace Connectify.Application.Services.EntitiesApplicationServices
         private readonly IChatService _chatService;
         private readonly IChatRepository _chatRepository;
         private readonly IUserChatRepository _userChatRepository;
+        private readonly IUserFriendRepository _userFriendRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserPrivateChatRepository _userPrivateChatRepository;
         public ChatApplicationService(IChatService chatService,
                                         IUserChatRepository userChatRepository,
                                         IChatRepository chatRepository,
                                         IUnitOfWork untiOfWork,
-                                        IUserPrivateChatRepository userPrivateChatRepository)
+                                        IUserPrivateChatRepository userPrivateChatRepository,
+                                        IUserFriendRepository userFriendRepository)
         {
             _chatService = chatService;
             _userChatRepository = userChatRepository;
             _chatRepository = chatRepository;
             _unitOfWork = untiOfWork;
             _userPrivateChatRepository = userPrivateChatRepository;
+            _userFriendRepository = userFriendRepository;
         }
-        public Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData)
+        public async Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData, Guid currentUserId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Chat chat = _chatService.CreateChat(ChatType.Group, chatData);
+
+                UserChat userChat = UserChatsFactory.CreateUserChat(currentUserId, chat.Id, UserRole.Owner);
+
+                await _userChatRepository.AddAsync(userChat);
+                await _unitOfWork.SaveChangesAsync();
+
+                return (true, chat.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return (false, default);
+            }
         }
 
         public async Task<(bool, Guid)> CreateNormalChat(Guid currentUserId, Guid chatUserId)
         {
            try
            {
-                Chat chat = new Chat()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "",
-                    Description = "",
-                    CreatedAt = DateTime.UtcNow,
-                };
+                var IsFriend = _userFriendRepository.GetFriend(currentUserId, chatUserId);
+                if (IsFriend == null)
+                    return (false, default);
+
+                Chat chat = _chatService.CreateChat(ChatType.Normal, null!);
 
                 UserChat userChat1 = UserChatsFactory.CreateUserChat(currentUserId, chat.Id, UserRole.Member);
                 UserChat userChat2 = UserChatsFactory.CreateUserChat(chatUserId, chat.Id, UserRole.Member);

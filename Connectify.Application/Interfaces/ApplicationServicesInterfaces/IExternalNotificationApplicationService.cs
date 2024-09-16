@@ -1,4 +1,5 @@
-﻿using Connectify.Domain.Entities;
+﻿using Connectify.Application.DTOs;
+using Connectify.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
     public interface IExternalNotificationApplicationService
     {
         Task WelcomeEmailNotification(User receiver);
-        Task ReceivedFriendRequestEmailNotification(User sender, User receiver);
+        Task ReceivedFriendRequestEmailNotification(UserDto sender, UserDto receiver);
     }
 }

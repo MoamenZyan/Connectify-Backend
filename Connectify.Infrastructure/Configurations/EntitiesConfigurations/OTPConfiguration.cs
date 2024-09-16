@@ -30,7 +30,7 @@ namespace Connectify.Infrastructure.Configurations.EntitiesConfigurations
                     .IsRequired();
 
             builder.Property(x => x.UserId)
-                    .HasColumnType("INTEGER")
+                    .HasColumnType("UNIQUEIDENTIFIER")
                     .HasMaxLength(256)
                     .IsRequired();
         }

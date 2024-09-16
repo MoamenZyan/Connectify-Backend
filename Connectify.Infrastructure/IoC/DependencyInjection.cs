@@ -34,6 +34,9 @@ using Amazon.S3;
 using Amazon;
 using Connectify.Application.Interfaces.AWSServicesInterfaces;
 using Connectify.Infrastructure.Services.AWSService;
+using Connectify.Application.Interfaces.HubInterfaces;
+using Connectify.Application.Hubs;
+using Hangfire;
 
 namespace Connectify.Infrastructure.IoC
 {
@@ -115,7 +118,7 @@ namespace Connectify.Infrastructure.IoC
                         OnMessageReceived = context =>
                         {
                             var path = context.HttpContext.Request.Path;
-                            if (path.StartsWithSegments("/chathub"))
+                            if (path.StartsWithSegments("/chathub") || path.StartsWithSegments("/notificationhub"))
                             {
                                 context.Token = context.Request.Query["access_token"];
                             }
@@ -166,6 +169,7 @@ namespace Connectify.Infrastructure.IoC
 
             // SignalR
             services.AddSignalR();
+            services.AddScoped<INotificationHub, NotificationHub>();
 
             // AWS
             var awsConfigs = configuration.GetSection("AWS").Get<AWSConfigurations>();
@@ -177,6 +181,11 @@ namespace Connectify.Infrastructure.IoC
             services.AddSingleton<IAmazonS3>(sp => new AmazonS3Client(credentials, configs));
             services.AddScoped<IPhotoService, PhotoService>();
             services.AddScoped<IAttachmentsService, AttachmentsService>();
+
+
+            // Hangfire
+            services.AddHangfire(x => x.UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection")));
+            services.AddHangfireServer();
 
 
             return services;

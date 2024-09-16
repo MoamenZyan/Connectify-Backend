@@ -86,9 +86,8 @@ namespace Connectify.Infrastructure.Migrations
                     b.Property<Guid>("ReceiverId")
                         .HasColumnType("UNIQUEIDENTIFIER");
 
-                    b.Property<string>("CreatedAt")
-                        .IsRequired()
-                        .HasColumnType("VARCHAR");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("DATETIME2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -177,7 +176,7 @@ namespace Connectify.Infrastructure.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasMaxLength(256)
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("UNIQUEIDENTIFIER");
 
                     b.HasKey("Id");
 

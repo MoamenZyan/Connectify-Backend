@@ -17,15 +17,15 @@ namespace Connectify.Application.DTOs
         public Guid RequestSenderId { get; set; }
         public string RequestSenderName { get; set; } = null!;
         public string RequestSenderPhoto { get; set; } = null!;
-        public AssociatedInfoNotificationDto(User user, AssociatedInfoNotification notification)
+        public AssociatedInfoNotificationDto(Guid senderId, string senderName, string senderPhoto, AssociatedInfoNotification notification)
         {
             Id = notification.Id;
             Content = notification.Content;
             Type = notification.Type;
             CreatedAt = notification.CreatedAt;
-            RequestSenderId = user.Id;
-            RequestSenderName = user.Fname;
-            RequestSenderPhoto = user.Photo;
+            RequestSenderId = senderId;
+            RequestSenderName = senderName;
+            RequestSenderPhoto = senderPhoto;
         }
     }
 

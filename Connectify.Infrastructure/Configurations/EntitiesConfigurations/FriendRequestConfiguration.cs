@@ -18,7 +18,7 @@ namespace Connectify.Infrastructure.Configurations.EntitiesConfigurations
             builder.HasKey(x => new { x.SenderId, x.ReceiverId });
 
             builder.Property(x => x.CreatedAt)
-                .HasColumnType("VARCHAR")
+                .HasColumnType("DATETIME2")
                 .IsRequired();
 
             builder.Property(x => x.Status)

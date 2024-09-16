@@ -10,5 +10,6 @@ namespace Connectify.Domain.Enums
     {
         Pending,
         Accepted,
+        Declined
     }
 }

@@ -9,7 +9,7 @@ namespace Connectify.Domain.Interfaces
 {
     public interface INotificationService
     {
-        AssociatedInfoNotification CreateAssociatedUserNotification(User associatedUser, string content);
+        AssociatedInfoNotification CreateAssociatedUserNotification(Guid associatedUserId, string content);
         InfoNotification CreateInfoNotification(string content);
     }
 }

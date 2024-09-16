@@ -1,5 +1,6 @@
-using Connectify.API.Controllers;
+using Connectify.Application.Hubs;
 using Connectify.Infrastructure.IoC;
+using Hangfire;
 using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<ChatHub>("/chathub");
+app.MapHub<NotificationHub>("/notificationhub");
 
 app.MapControllers();
 

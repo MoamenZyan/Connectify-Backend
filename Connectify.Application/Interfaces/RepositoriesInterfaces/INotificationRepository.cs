@@ -10,5 +10,6 @@ namespace Connectify.Application.Interfaces.RepositoriesInterfaces
     {
         Task DeleteNotification(Guid id);
         void UpdateNotification(T notification);
+        Task<T?> GetNotificationById(Guid id);
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Connectify.Domain.Entities;
+using Connectify.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,8 @@ namespace Connectify.Domain.Interfaces
 {
     public interface IChatService
     {
-        void ValidateChat(Dictionary<string, string> chat);
+        void ValidateChatName(string chatName);
+        Chat CreateChat(ChatType chatType, IFormCollection data = null!);
+
     }
 }

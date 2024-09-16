@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Connectify.Application.DTOs;
 
 namespace Connectify.Application.Services.NotificationServices
 {
@@ -23,14 +24,14 @@ namespace Connectify.Application.Services.NotificationServices
             _receivedFriendRequestEmailStrategy = receivedFriendRequestEmailStrategy;
             _notificationContext = notificationContext;
         }
-        public async Task ReceivedFriendRequestEmailNotification(User sender, User receiver)
+        public async Task ReceivedFriendRequestEmailNotification(UserDto sender, UserDto receiver)
         {
             _notificationContext.SetStrategy(_receivedFriendRequestEmailStrategy);
             Dictionary<string, string> data = new Dictionary<string, string>()
             {
-                {"SenderName", sender.Fname }
+                {"SenderName", sender.FullName }
             };
-            await _notificationContext.Send(receiver.Fname, receiver.Email, data);
+            await _notificationContext.Send(receiver.FullName, receiver.Email, data);
         }
 
         public async Task WelcomeEmailNotification(User receiver)

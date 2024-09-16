@@ -32,6 +32,12 @@ namespace Connectify.Infrastructure.Repositories
             return await _context.UserFriends.ToListAsync();
         }
 
+        public async Task<UserFriend?> GetFriend(Guid userId1, Guid userId2)
+        {
+            return await _context.UserFriends.FirstOrDefaultAsync(x => (x.UserId1 == userId1 && x.UserId2 == userId2) ||
+                                                            (x.UserId1 == userId2 && x.UserId2 == userId1));
+        }
+
         public async Task RemoveFriendAsync(Guid userId1, Guid userId2)
         {
             await _context.UserFriends.Where(x => x.UserId1 == userId1 && x.UserId2 == userId2).ExecuteDeleteAsync();

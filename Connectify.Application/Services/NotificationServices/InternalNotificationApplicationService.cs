@@ -1,8 +1,12 @@
-﻿using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+﻿using Connectify.Application.DTOs;
+using Connectify.Application.Hubs;
+using Connectify.Application.Interfaces.ApplicationServicesInterfaces;
+using Connectify.Application.Interfaces.HubInterfaces;
 using Connectify.Application.Interfaces.RepositoriesInterfaces;
 using Connectify.Domain.Entities;
 using Connectify.Domain.Factories;
 using Connectify.Domain.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,29 +22,43 @@ namespace Connectify.Application.Services.NotificationServices
         private readonly INotificationRepository<AssociatedInfoNotification> _associateInfoNotificationRepository;
         private readonly IUserNotificationRepository<UserInfoNotification> _userInfoNotificationRepository;
         private readonly IUserNotificationRepository<UserAssociatedInfoNotification> _userAssociatedInfoNotificationRepository;
+        private readonly INotificationHub _notificationHub;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<NotificationHub> _hubContext;
         public InternalNotificationApplicationService(INotificationService notificationService,
                                                 INotificationRepository<InfoNotification> infoNotificationRepository,
                                                 INotificationRepository<AssociatedInfoNotification> associateInfoNotificationRepository,
                                                 IUserNotificationRepository<UserInfoNotification> userInfoNotificationRepository,
-                                                IUserNotificationRepository<UserAssociatedInfoNotification> userAssociatedInfoNotificationRepository)
+                                                IUserNotificationRepository<UserAssociatedInfoNotification> userAssociatedInfoNotificationRepository,
+                                                INotificationHub notificationHub,
+                                                IUnitOfWork unitOfWork,
+                                                IHubContext<NotificationHub> hubContext)
         {
             _notificationService = notificationService;
             _infoNotificationRepository = infoNotificationRepository;
             _associateInfoNotificationRepository = associateInfoNotificationRepository;
             _userAssociatedInfoNotificationRepository = userAssociatedInfoNotificationRepository;
             _userInfoNotificationRepository = userInfoNotificationRepository;
+            _notificationHub = notificationHub;
+            _unitOfWork = unitOfWork;
+            _hubContext = hubContext;
         }
-        public async Task ReceivedFriendRequestNotification(User sender, User receiver)
+        public async Task ReceivedFriendRequestNotification(UserDto sender, UserDto receiver)
         {
-            var notification = _notificationService.CreateAssociatedUserNotification(sender, $"{receiver.Fname}, you got friend request from {sender.Fname}");
+            var notification = _notificationService.CreateAssociatedUserNotification(sender.Id, $"You got friend request from {sender.FullName}");
             var userNotification = new UserAssociatedInfoNotification()
             {
                 UserId = receiver.Id,
                 NotificationId = notification.Id,
             };
-            
+            notification.Type = Domain.Enums.NotificationType.FriendRequest;
             await _associateInfoNotificationRepository.AddAsync(notification);
             await _userAssociatedInfoNotificationRepository.AddAsync(userNotification);
+            await _unitOfWork.SaveChangesAsync();
+
+            var fullNotification = await _associateInfoNotificationRepository.GetNotificationById(notification.Id);
+            if (fullNotification != null)
+                await _notificationHub.SendAssociatedNotificationToSpecificUser(_hubContext, new DTOs.AssociatedInfoNotificationDto(sender.Id, sender.FullName, sender.Photo, fullNotification), receiver.Id);
         }
 
         public async Task WelcomeNotification(User receiver)
@@ -50,6 +68,9 @@ namespace Connectify.Application.Services.NotificationServices
 
             await _infoNotificationRepository.AddAsync(notification);
             await _userInfoNotificationRepository.AddAsync(userNotification);
+
+            await Task.WhenAll(_notificationHub.SendInfoNotificationToSpecificUser(_hubContext, notification, receiver.Id),
+                            _unitOfWork.SaveChangesAsync());
         }
     }
 }

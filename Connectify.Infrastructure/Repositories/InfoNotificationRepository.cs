@@ -37,6 +37,11 @@ namespace Connectify.Infrastructure.Repositories
             return await _context.InfoNotifications.ToListAsync();
         }
 
+        public async Task<InfoNotification?> GetNotificationById(Guid id)
+        {
+            return await _context.InfoNotifications.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
         public void UpdateNotification(InfoNotification notification)
         {
             _context.InfoNotifications.Update(notification);

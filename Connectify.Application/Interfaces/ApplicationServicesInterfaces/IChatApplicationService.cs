@@ -13,7 +13,7 @@ namespace Connectify.Application.Interfaces.ApplicationServicesInterfaces
     public interface IChatApplicationService
     {
         Task<(bool, Guid)> CreateNormalChat(Guid currentUserId, Guid chatUserId);
-        Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData);
+        Task<(bool, Guid)> CreateGroupChat(IFormCollection chatData, Guid currentUserId);
         Task<ChatDto?> GetPrivateChat(Guid currentUserId, Guid receiverId);
         Task<bool> DeleteChat(int chatId);
         Task<bool> UserJoinGroupChat(int chatId, int userId, UserRole role);

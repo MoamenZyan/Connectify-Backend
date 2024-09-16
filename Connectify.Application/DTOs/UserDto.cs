@@ -23,12 +23,14 @@ namespace Connectify.Application.DTOs
         public List<ChatDto> GroupChats { get; set; } = new List<ChatDto>();
         public List<UserMinimalDto> BlockedUsers { get; set; } = new List<UserMinimalDto>();
         public List<UserMinimalDto> Friends { get; set; } = new List<UserMinimalDto>();
-        public List<FriendRequest> SentFriendRequests { get; set; } = new List<FriendRequest>();
-        public List<FriendRequest> ReceivedFriendRequests { get; set; } = new List<FriendRequest>();
+        public Dictionary<Guid, SentFriendRequestDto> SentFriendRequests { get; set; } = new Dictionary<Guid, SentFriendRequestDto>();
+        public Dictionary<Guid, ReceivedFriendRequestDto> ReceivedFriendRequests { get; set; } = new Dictionary<Guid, ReceivedFriendRequestDto>();
         public List<AssociatedInfoNotificationDto> AssociatedInfoNotifications { get; set; } = new List<AssociatedInfoNotificationDto>();
         public List<InfoNotificationDto> InfoNotifications { get; set; } = new List<InfoNotificationDto>();
         public UserDto(User user)
         {
+            if (user == null)
+                return;
             Id = user.Id;
             FullName = $"{user.Fname} {user.Lname}";
             Email = user.Email;
@@ -48,9 +50,9 @@ namespace Connectify.Application.DTOs
             Friends = user.Friends.Select(x => new UserMinimalDto(x.User2))
                     .Concat(user.FriendOf.Select(x => new UserMinimalDto(x.User1))).ToList();
 
-            SentFriendRequests = user.SentFriendRequests;
-            ReceivedFriendRequests = user.ReceivedFriendRequests;
-            AssociatedInfoNotifications = user.AssociatedInfoNotifications.Select(x => new AssociatedInfoNotificationDto(x.AssoicatedUser, x)).ToList();
+            SentFriendRequests = user.SentFriendRequests.Select(x => new SentFriendRequestDto(x)).ToDictionary(x => x.ReceiverId, x => x);
+            ReceivedFriendRequests = user.ReceivedFriendRequests.Select(x => new ReceivedFriendRequestDto(x)).ToDictionary(x => x.SenderId, x => x);
+            AssociatedInfoNotifications = user.UserAssociatedInfoNotifications.Select(x => new AssociatedInfoNotificationDto(x.Notification.AssoicatedUser.Id, x.Notification.AssoicatedUser.Fname + " " + x.Notification.AssoicatedUser.Lname, x.Notification.AssoicatedUser.Photo, x.Notification)).ToList();
             InfoNotifications = user.UserInfoNotifications.Select(x => new InfoNotificationDto(x.Notification)).ToList();
         }
     }

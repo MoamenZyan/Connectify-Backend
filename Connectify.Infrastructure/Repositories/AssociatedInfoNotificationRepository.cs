@@ -37,6 +37,13 @@ namespace Connectify.Infrastructure.Repositories
             return await _context.AssociatedInfoNotifications.ToListAsync();
         }
 
+        public async Task<AssociatedInfoNotification?> GetNotificationById(Guid id)
+        {
+            return await _context.AssociatedInfoNotifications.Include(x => x.AssoicatedUser)
+                                                                .ThenInclude(x => x.SentFriendRequests)
+                                                             .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
         public void UpdateNotification(AssociatedInfoNotification notification)
         {
             _context.AssociatedInfoNotifications.Update(notification);

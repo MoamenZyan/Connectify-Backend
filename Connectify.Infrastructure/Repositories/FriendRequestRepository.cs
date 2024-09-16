@@ -24,7 +24,8 @@ namespace Connectify.Infrastructure.Repositories
 
         public async Task DeleteFriendRequest(Guid senderId, Guid receiverId)
         {
-            await _context.FriendRequests.Where(x => x.SenderId == senderId && x.ReceiverId == receiverId)
+            await _context.FriendRequests.Where(x => x.SenderId == senderId && x.ReceiverId == receiverId ||
+                                                x.SenderId == receiverId && x.ReceiverId == senderId)
                                         .ExecuteDeleteAsync();
         }
 
